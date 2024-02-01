@@ -11,7 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "@account-abstraction/contracts": "0.6.0",
-    "@openzeppelin/contracts": "^4.2.0",
+    "@openzeppelin/contracts": "^4.9.5",
     "hardhat": "^2.19.4"
   },
   "devDependencies": {

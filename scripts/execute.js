@@ -24,7 +24,7 @@ async function main() {
         nonce: FACTORY_NONCE
     });
 
-    const [signer0] = await hre.ethers.getSigners();
+    const [signer0, signer1] = await hre.ethers.getSigners();
     const owner = await signer0.getAddress();
     const accountFactory = await hre.ethers.getContractFactory("AccountFactory");
 
@@ -37,24 +37,27 @@ async function main() {
     // await entryPoint.depositTo(PM_ADDRESS, {
     //     value: hre.ethers.parseEther("100")
     // });
-    console.log("PM Bal", await ethers.provider.getBalance(PM_ADDRESS));
+
     const userOp = {
         sender, // The address of the SCA
         nonce: await entryPoint.getNonce(sender, 0), // Nonce is managed by the EP and must be gotten from the NonceManager contract
         initCode: "0x", // The AF function createAccount and its args
         callData: account.interface.encodeFunctionData("execute"), // The function in the userOp to call 
-        callGasLimit: 200_000,
-        verificationGasLimit: 200_000,
-        preVerificationGas: 50_000,
+        callGasLimit: 400_000,
+        verificationGasLimit: 400_000,
+        preVerificationGas: 100_000,
         maxFeePerGas: hre.ethers.parseUnits("10", "gwei"),
         maxPriorityFeePerGas: hre.ethers.parseUnits("5", "gwei"),
         paymasterAndData: PM_ADDRESS,
         signature: "0x"
     };
 
+    const userOpHash = await entryPoint.getUserOpHash(userOp);
+    userOp.signature = signer0.signMessage(hre.ethers.getBytes(userOpHash));
+
     const tx = await entryPoint.handleOps([userOp], owner);
     const receipt = await tx.wait();
-    // console.log(receipt);
+    console.log(receipt);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
