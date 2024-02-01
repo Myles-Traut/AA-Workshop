@@ -6,10 +6,11 @@
 // global scope, and execute the script.
 const hre = require("hardhat");
 
-const FACTORY_NONCE = 2;
+const FACTORY_NONCE = 1;
 
 const FACTORY_ADDRESS = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
 const EP_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+const PM_ADDRESS = "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0";
 
 // CREATE: hash(deployer + nonce)
 
@@ -27,13 +28,16 @@ async function main() {
     const owner = await signer0.getAddress();
     const accountFactory = await hre.ethers.getContractFactory("AccountFactory");
 
-    const initCode = FACTORY_ADDRESS + accountFactory.interface.encodeFunctionData("createAccount", [owner]).slice(2);
+    const initCode = FACTORY_ADDRESS + accountFactory.interface.encodeFunctionData("createAccount", [owner]).slice(2); // accountFactory.interface.encodeFunctionData("createAccount", [owner]).slice(2);
 
     const account = await hre.ethers.getContractFactory("Account");
-    console.log(sender);
-    // await entryPoint.depositTo(sender, {
+
+    console.log({ sender });
+
+    // await entryPoint.depositTo(PM_ADDRESS, {
     //     value: hre.ethers.parseEther("100")
     // });
+    console.log("PM Bal", await ethers.provider.getBalance(PM_ADDRESS));
     const userOp = {
         sender, // The address of the SCA
         nonce: await entryPoint.getNonce(sender, 0), // Nonce is managed by the EP and must be gotten from the NonceManager contract
@@ -44,13 +48,13 @@ async function main() {
         preVerificationGas: 50_000,
         maxFeePerGas: hre.ethers.parseUnits("10", "gwei"),
         maxPriorityFeePerGas: hre.ethers.parseUnits("5", "gwei"),
-        paymasterAndData: "0x",
+        paymasterAndData: PM_ADDRESS,
         signature: "0x"
     };
 
     const tx = await entryPoint.handleOps([userOp], owner);
     const receipt = await tx.wait();
-    console.log(receipt);
+    // console.log(receipt);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

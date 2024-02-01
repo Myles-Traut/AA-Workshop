@@ -14,6 +14,22 @@ async function main() {
   console.log(
     `Ep deployed to ${ep.target}`
   );
+
+  const af = await hre.ethers.deployContract("AccountFactory");
+
+  await af.waitForDeployment();
+
+  console.log(
+    `Af deployed to ${af.target}`
+  );
+
+  const pm = await hre.ethers.deployContract("Paymaster");
+
+  await pm.waitForDeployment();
+
+  console.log(
+    `Pm deployed to ${pm.target}`
+  );
 }
 
 // We recommend this pattern to be able to use async/await everywhere
